@@ -1,6 +1,6 @@
 kaldi-gmm-demo
 ====
-A demo to show how to train a GMM using Kaldi
+A demo to show how to train a GMM with Kaldi
 
 ### Dependency
 
