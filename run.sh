@@ -16,7 +16,8 @@ mkdir data exp logs
 # Generate data
 # See https://cn.mathworks.com/help/stats/gmdistribution-class.html
 echo Generating data
-$cmd logs/generate_data.log python local/generate_data.py $data
+$cmd logs/generate-data.log python local/generate_data.py $data.txt
+$cmd logs/convert-feats.log copy-feats ark,t:$data.txt ark:$data
 
 # Train the GMM
 echo Training GMM
@@ -40,12 +41,12 @@ $cmd logs/translate-diag-gmm.log gmm-global-copy \
 echo Calculating the likelihoods
 $cmd logs/calculate-likelihoods-by-frame.log gmm-global-get-frame-likes \
 	$diag_gmm_dir/final.dubm \
-	ark,t:$data \
+	ark:$data \
 	ark,t:exp/likelihoods-by-frame.ark
 $cmd logs/calculate-likelihoods-by-sample.log gmm-global-get-frame-likes \
 	--average \
 	$diag_gmm_dir/final.dubm \
-	ark,t:$data \
+	ark:$data \
 	ark,t:exp/likelihoods-by-sample.ark
 
 # Print results
