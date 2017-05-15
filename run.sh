@@ -22,10 +22,10 @@ $cmd logs/convert-feats.log copy-feats ark,t:$data.txt ark:$data
 # Train the GMM
 echo Training GMM
 $cmd logs/train_diag_gmm.log local/train_diag_gmm.sh \
-	--nj 1 \
+	--nj 8 \
 	--num-iters 5 \
 	--initial-gauss-proportion 1 \
-	--num-threads 1 \
+	--num-threads 8 \
 	ark:$data \
 	$num_gauss \
 	$diag_gmm_dir
