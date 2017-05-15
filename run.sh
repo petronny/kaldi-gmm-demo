@@ -26,7 +26,7 @@ $cmd logs/train_diag_gmm.log local/train_diag_gmm.sh \
 	--num-iters 5 \
 	--initial-gauss-proportion 1 \
 	--num-threads 1 \
-	$data \
+	ark:$data \
 	$num_gauss \
 	$diag_gmm_dir
 

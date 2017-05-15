@@ -27,7 +27,6 @@ initial_gauss_proportion=0.5 # Start with half the target number of Gaussians
 subsample=5 # subsample all features with this periodicity, in the main E-M phase.
 cleanup=true
 min_gaussian_weight=0.0001
-remove_low_count_gaussians=true # set this to false if you need #gauss to stay fixed.
 num_threads=32
 delta_window=3
 delta_order=2
@@ -41,7 +40,7 @@ echo "$0 $@"  # Print the command line for logging
 
 if [ $# != 3 ]; then
   echo "Usage: $0  <data> <num-gauss> <output-dir>"
-  echo " e.g.: $0 data/train 1024 exp/diag_ubm"
+  echo " e.g.: $0 ark:data.ark 1024 exp/diag_ubm"
   echo "Options: "
   echo "  --cmd (utils/run.pl|utils/queue.pl <queue opts>) # how to run jobs."
   echo "  --nj <num-jobs|4>                                # number of parallel jobs to run."
@@ -94,8 +93,8 @@ echo $delta_opts > $dir/delta_opts
 #all_feats="ark,s,cs:add-deltas $delta_opts scp:$data/feats.scp ark:- | apply-cmvn-sliding --norm-vars=false --center=true --cmn-window=300 ark:- ark:- | select-voiced-frames ark:- scp,s,cs:$data/vad.scp ark:- |"
 #feats="ark,s,cs:add-deltas $delta_opts scp:$sdata/JOB/feats.scp ark:- | apply-cmvn-sliding --norm-vars=false --center=true --cmn-window=300 ark:- ark:- | select-voiced-frames ark:- scp,s,cs:$sdata/JOB/vad.scp ark:- | subsample-feats --n=$subsample ark:- ark:- |"
 
-all_feats="ark,t:$data"
-feats="ark,t:$data"
+all_feats="$data"
+feats="$data"
 
 num_gauss_init=$(perl -e "print int($initial_gauss_proportion * $num_gauss); ");
 ! [ $num_gauss_init -gt 0 ] && echo "Invalid num-gauss-init $num_gauss_init" && exit 1;
