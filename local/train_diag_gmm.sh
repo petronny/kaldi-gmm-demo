@@ -126,7 +126,7 @@ for x in `seq 0 $[$num_iters-1]`; do
   if [ $stage -le $x ]; then
   # Accumulate stats.
     $cmd JOB=1:$nj $dir/log/acc.$x.JOB.log \
-      gmm-global-acc-stats "--gselect=ark,s,cs:gunzip -c $dir/gselect.JOB.gz|" \
+      gmm-global-acc-stats "--gselect=ark:gunzip -c $dir/gselect.JOB.gz|" \
       $dir/$x.dubm "$feats" $dir/$x.JOB.acc || exit 1;
       opt="--remove-low-count-gaussians=false" # or gselect info won't be valid any more.
     $cmd $dir/log/update.$x.log \
