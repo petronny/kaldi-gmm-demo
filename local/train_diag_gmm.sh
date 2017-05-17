@@ -24,9 +24,10 @@ num_gselect=30 # Number of Gaussian-selection indices to use while training
 num_frames=500000 # number of frames to keep in memory for initialization
 num_iters_init=20
 initial_gauss_proportion=0.5 # Start with half the target number of Gaussians
-subsample=5 # subsample all features with this periodicity, in the main E-M phase.
+subsample=1 # subsample all features with this periodicity, in the main E-M phase.
 cleanup=true
 min_gaussian_weight=0.0001
+remove_low_count_gaussians=false # set this to false if you need #gauss to stay fixed.
 num_threads=32
 delta_window=3
 delta_order=2
@@ -49,24 +50,23 @@ if [ $# != 3 ]; then
   echo "  --stage <stage|-2>                               # stage to do partial re-run from."
   echo "  --num-gselect <n|30>                             # Number of Gaussians per frame to"
   echo "                                                   # limit computation to, for speed"
-  echo " --subsample <n|5>                                 # In main E-M phase, use every n"
+  echo "  --subsample <n|5>                                # In main E-M phase, use every n"
   echo "                                                   # frames (a speedup)"
   echo "  --num-frames <n|500000>                          # Maximum num-frames to keep in memory"
   echo "                                                   # for model initialization"
   echo "  --num-iters-init <n|20>                          # Number of E-M iterations for model"
   echo "                                                   # initialization"
-  echo " --initial-gauss-proportion <proportion|0.5>       # Proportion of Gaussians to start with"
+  echo "  --initial-gauss-proportion <proportion|0.5>      # Proportion of Gaussians to start with"
   echo "                                                   # in initialization phase (then split)"
-  echo " --num-threads <n|32>                              # number of threads to use in initialization"
+  echo "  --num-threads <n|32>                             # number of threads to use in initialization"
   echo "                                                   # phase (must match with parallel-opts option)"
-  echo " --parallel-opts <string|'--num-threads 32'>             # Option should match number of threads in"
+  echo "  --parallel-opts <string|'--num-threads 32'>      # Option should match number of threads in"
   echo "                                                   # --num-threads option above"
-  echo " --min-gaussian-weight <weight|0.0001>             # min Gaussian weight allowed in GMM"
-  echo "                                                   # initialization (this relatively high"
-  echo "                                                   # value keeps counts fairly even)"
-  echo " --delta-window <n|3>                              # number of frames of context used to"
+  echo "  --remove-low-count-gaussians <bool|false>        # If true, remove Gaussians that fall below the floors"
+  echo "  --min-gaussian-weight <weight|0.0001>            # Min Gaussian weight before we remove it"
+  echo "  --delta-window <n|3>                             # number of frames of context used to"
   echo "                                                   # calculate delta"
-  echo " --delta-order <n|2>                               # number of delta features"
+  echo "  --delta-order <n|2>                              # number of delta features"
   exit 1;
 fi
 
@@ -125,7 +125,11 @@ for x in `seq 0 $[$num_iters-1]`; do
     $cmd JOB=1:$nj $dir/log/acc.$x.JOB.log \
       gmm-global-acc-stats "--gselect=ark:gunzip -c $dir/gselect.JOB.gz|" \
       $dir/$x.dubm "$feats" $dir/$x.JOB.acc || exit 1;
+    if [ $x -lt $[$num_iters-1] ]; then # Don't remove low-count Gaussians till last iter,
       opt="--remove-low-count-gaussians=false" # or gselect info won't be valid any more.
+    else
+      opt="--remove-low-count-gaussians=$remove_low_count_gaussians"
+    fi
     $cmd $dir/log/update.$x.log \
       gmm-global-est $opt --min-gaussian-weight=$min_gaussian_weight $dir/$x.dubm "gmm-global-sum-accs - $dir/$x.*.acc|" \
       $dir/$[$x+1].dubm || exit 1;

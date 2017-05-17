@@ -1,9 +1,11 @@
 #!/bin/bash
 
 # Settings
+cores=8
 num_gauss=2
 data=data/data.ark
 diag_gmm_dir=exp/diag_gmm
+remove_low_count_gaussians=false # set this to false if you need #gauss to stay fixed.
 
 . ./path.sh
 cmd="utils/run.pl"
@@ -22,10 +24,12 @@ $cmd logs/convert-feats.log copy-feats ark,t:$data.txt ark:$data
 # Train the GMM
 echo Training GMM
 $cmd logs/train_diag_gmm.log local/train_diag_gmm.sh \
-	--nj 8 \
+	--nj $cores \
 	--num-iters 5 \
 	--initial-gauss-proportion 1 \
-	--num-threads 8 \
+	--subsample 1 \
+	--num-threads $cores \
+	--remove-low-count-gaussians $remove_low_count_gaussians \
 	ark:$data \
 	$num_gauss \
 	$diag_gmm_dir
