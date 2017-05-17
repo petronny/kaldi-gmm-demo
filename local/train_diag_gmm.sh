@@ -112,7 +112,7 @@ if [ $stage -le -1 ]; then
   echo Getting Gaussian-selection info
   $cmd JOB=1:$nj $dir/log/gselect.JOB.log \
     gmm-gselect --n=$num_gselect $dir/0.dubm "$feats" \
-      "ark:|gzip -c >$dir/gselect.JOB.gz" || exit 1;
+      "ark:$dir/gselect.JOB.ark" || exit 1;
 fi
 
 echo "$0: will train for $num_iters iterations, in parallel over"
@@ -123,7 +123,7 @@ for x in `seq 0 $[$num_iters-1]`; do
   if [ $stage -le $x ]; then
   # Accumulate stats.
     $cmd JOB=1:$nj $dir/log/acc.$x.JOB.log \
-      gmm-global-acc-stats "--gselect=ark:gunzip -c $dir/gselect.JOB.gz|" \
+      gmm-global-acc-stats "--gselect=ark:$dir/gselect.JOB.ark" \
       $dir/$x.dubm "$feats" $dir/$x.JOB.acc || exit 1;
     if [ $x -lt $[$num_iters-1] ]; then # Don't remove low-count Gaussians till last iter,
       opt="--remove-low-count-gaussians=false" # or gselect info won't be valid any more.
@@ -137,7 +137,7 @@ for x in `seq 0 $[$num_iters-1]`; do
   fi
 done
 
-$cleanup && rm $dir/gselect.*.gz
+$cleanup && rm $dir/gselect.*.ark
 
 mv $dir/$num_iters.dubm $dir/final.dubm || exit 1;
 exit 0;
