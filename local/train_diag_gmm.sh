@@ -98,7 +98,7 @@ if [ $stage -le -2 ]; then
   echo "$0: starting from $num_gauss_init Gaussians, reaching $num_gauss;"
   echo "$0: for $num_iters_init iterations, using at most $num_frames frames of data"
 
-    gmm-global-init-from-feats --num-threads=$num_threads --num-frames=$num_frames \
+    cpulimit -l ${num_threads}00 gmm-global-init-from-feats --num-threads=$num_threads --num-frames=$num_frames \
      --min-gaussian-weight=$min_gaussian_weight \
      --num-gauss=$num_gauss --num-gauss-init=$num_gauss_init --num-iters=$num_iters_init \
     "$all_feats" $dir/0.dubm || exit 1;
