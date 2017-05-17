@@ -91,7 +91,8 @@ echo $delta_opts > $dir/delta_opts
 # Note: there is no point subsampling all_feats, because gmm-global-init-from-feats
 # effectively does subsampling itself (it keeps a random subset of the features).
 all_feats="$data"
-feats="ark:subsample-feats --n=$subsample $data ark:-|"
+feats="$data"
+[ "$subsample" -ge 2 ] && feats="ark:subsample-feats --n=$subsample $data ark:-|"
 
 num_gauss_init=$(perl -e "print int($initial_gauss_proportion * $num_gauss); ");
 ! [ $num_gauss_init -gt 0 ] && echo "Invalid num-gauss-init $num_gauss_init" && exit 1;
