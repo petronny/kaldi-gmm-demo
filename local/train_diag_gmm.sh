@@ -80,10 +80,6 @@ dir=$3
 mkdir -p $dir/log
 #utils/split_data.sh $data $nj || exit 1;
 
-#for f in $data/feats.scp $data/vad.scp; do
-#   [ ! -f $f ] && echo "$0: expecting file $f to exist" && exit 1
-#done
-
 parallel_opts="--num-threads $num_threads"
 delta_opts="--delta-window=$delta_window --delta-order=$delta_order"
 echo $delta_opts > $dir/delta_opts
